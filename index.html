@@ -1184,6 +1184,31 @@ let modalCurrentSlide = 0;
             });
         }
 
+       
+    // Fungsi untuk membuka detail tanpa keluar dari halaman
+function bukaDetail(id) {
+    // 1. Sembunyikan halaman utama
+    document.getElementById('home-page').style.display = 'none';
+    
+    // 2. Munculkan halaman detail yang dipilih (asumsi div detail punya ID sesuai parameter)
+    document.getElementById(id).style.display = 'block';
+    
+    // 3. PENTING: Tambahkan 'jejak' ke history browser
+    window.history.pushState({page: id}, "", "#" + id);
+}
+
+// Fungsi untuk menangani tombol Back HP
+window.onpopstate = function(event) {
+    // Tampilkan kembali halaman utama
+    document.getElementById('home-page').style.display = 'block';
+    
+    // Sembunyikan semua elemen detail yang terbuka
+    // Pastikan div detail Wak punya class="detail-page"
+    document.querySelectorAll('.detail-page').forEach(function(el) {
+        el.style.display = 'none';
+    });
+};
+
         function toggleCategory(cat) {
             if (currentFilterCategory === cat) { clearCategoryFilter(); } 
             else {
@@ -1379,6 +1404,8 @@ let modalCurrentSlide = 0;
             if (footer) {
                 footer.style.setProperty('display', 'none', 'important');
             }
+            window.history.pushState({page: 'detail', title: product.title}, "", "#detail");
+
         }
 
         function updateCarouselView() {
@@ -1563,8 +1590,25 @@ document.addEventListener('DOMContentLoaded', enableSwipeDetail);
                 footer.style.setProperty('display', 'block', 'important');
             }
 
+            // 2. Tambahan: Balik ke riwayat sebelumnya di browser
+    
+}
+
+// 3. Tambahkan ini di luar fungsi manapun (di bawah file)
+window.onpopstate = function(event) {
+    // Jika tombol Back HP ditekan, panggil fungsi goBackToHome()
+    goBackToHome();
+    
             
         }
+
+        // Mendeteksi tombol Back HP
+window.onpopstate = function(event) {
+    if (document.getElementById("detail-page").style.display === "flex") {
+        // Jika halaman detail terbuka, panggil fungsi untuk tutup detail
+        goBackToHome();
+    }
+};
         
         function sharePropertyDirectly() { showToast("Tautan disalin!"); }
         
