@@ -1333,7 +1333,7 @@ window.onpopstate = function(event) {
 
         function showProductDetails(product) {
             
-            posisiScrollTerakhir = window.pageYOffset || document.documentElement.scrollTop;
+            sessionStorage.setItem('posisiScroll', window.pageYOffset || document.documentElement.scrollTop);
     
     activeProduct = product;
             activeProduct = product;
@@ -1605,19 +1605,21 @@ document.addEventListener('DOMContentLoaded', enableSwipeDetail);
 
 // 3. Tambahkan ini di luar fungsi manapun (di bawah file)
 window.onpopstate = function(event) {
-    // 1. Jika kita menutup detail, kembalikan ke home
     if (document.getElementById("detail-page").style.display === "flex") {
         goBackToHome();
     }
-    
-    // 2. Trik Paksa Scroll (Supaya tidak lompat ke atas)
-    // requestAnimationFrame memastikan ini jalan setelah browser selesai merender halaman
-    requestAnimationFrame(function() {
-        window.scrollTo({
-            top: posisiScrollTerakhir,
-            behavior: 'instant' // 'instant' membuat transisi langsung tanpa animasi yang bikin bug
-        });
-    });
+
+    // Ambil posisi dari penyimpanan
+    const savedPos = sessionStorage.getItem('posisiScroll') || 0;
+
+    // "Pengejaran" posisi: lakukan scroll berkali-kali dalam durasi singkat
+    // Ini gunanya untuk menimpa posisi 0 paksaan dari browser
+    let count = 0;
+    const interval = setInterval(function() {
+        window.scrollTo(0, savedPos);
+        count++;
+        if (count > 5) clearInterval(interval); // Berhenti setelah 5 kali coba
+    }, 50); // Cek tiap 50ms
 };
         
         function sharePropertyDirectly() { showToast("Tautan disalin!"); }
