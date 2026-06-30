@@ -1332,6 +1332,10 @@ window.onpopstate = function(event) {
             let posisiScrollTerakhir = 0;
 
         function showProductDetails(product) {
+            
+            posisiScrollTerakhir = window.pageYOffset || document.documentElement.scrollTop;
+    
+    activeProduct = product;
             activeProduct = product;
 
         // 1. PINDAHKAN HALAMAN (Home disembunyikan, Detail dimunculkan)
@@ -1582,32 +1586,38 @@ function handleSwipeDetail() {
 document.addEventListener('DOMContentLoaded', enableSwipeDetail);
 
         function goBackToHome() {
-            document.getElementById("home-page").style.display = "flex";
-            window.scrollTo({ top: homeScrollPosition, behavior: 'instant' });
-            document.getElementById("detail-page").style.display = "none";
-            const footer = document.getElementById("web-footer");
-            if (footer) {
-                footer.style.setProperty('display', 'block', 'important');
-            }
-
-            // 2. Tambahan: Balik ke riwayat sebelumnya di browser
+    // 1. Tampilkan kembali Home & Sembunyikan Detail
+    document.getElementById("home-page").style.display = "flex";
+    document.getElementById("detail-page").style.display = "none";
     
+    // 2. Tampilkan Footer
+    const footer = document.getElementById("web-footer");
+    if (footer) {
+        footer.style.setProperty('display', 'block', 'important');
+    }
+
+    // 3. PENGEMBALIAN POSISI SCROLL (Pakai nama variabel yang sama)
+    window.scrollTo({ 
+        top: posisiScrollTerakhir, 
+        behavior: 'instant' 
+    });
 }
 
 // 3. Tambahkan ini di luar fungsi manapun (di bawah file)
 window.onpopstate = function(event) {
-    // Jika tombol Back HP ditekan, panggil fungsi goBackToHome()
-    goBackToHome();
-    
-            
-        }
-
-        // Mendeteksi tombol Back HP
-window.onpopstate = function(event) {
+    // 1. Jika kita menutup detail, kembalikan ke home
     if (document.getElementById("detail-page").style.display === "flex") {
-        // Jika halaman detail terbuka, panggil fungsi untuk tutup detail
         goBackToHome();
     }
+    
+    // 2. Trik Paksa Scroll (Supaya tidak lompat ke atas)
+    // requestAnimationFrame memastikan ini jalan setelah browser selesai merender halaman
+    requestAnimationFrame(function() {
+        window.scrollTo({
+            top: posisiScrollTerakhir,
+            behavior: 'instant' // 'instant' membuat transisi langsung tanpa animasi yang bikin bug
+        });
+    });
 };
         
         function sharePropertyDirectly() { showToast("Tautan disalin!"); }
