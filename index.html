@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sebuahrumah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#1E3A8A',      /* Biru Navy Gelap (Utama) */
+                            lightBg: '#F0F4F8',      /* Latar Belakang Lembut */
+                            accent: '#D4AF37',       /* Emas Elegan (Aksen) */
+                            accentLight: '#FBF7E9',  /* Emas Muda */
+                            darkText: '#1A202C',     /* Teks Gelap */
+                            bgGray: '#F7FAFC'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 md:bg-gray-900 font-sans antialiased flex justify-center items-start min-h-screen p-0 md:p-4">
+
+    <!-- BINGKAI UTAMA -->
+    <div class="w-full max-w-[450px] min-h-screen bg-brand-bgGray flex flex-col relative shadow-2xl md:rounded-2xl overflow-hidden border border-gray-200 md:border-gray-700">
+        
+        <!-- ================= HALAMAN 1: DASHBOARD UTAMA ================= -->
+        <div id="home-page" class="w-full flex flex-col">
+            
+            <!-- SEARCH HEADER -->
+            <header class="bg-brand-primary px-4 pt-5 pb-3 flex flex-col gap-3.5 shadow-md shrink-0">
+                <!-- Area Teks Logo sebuahrumah (Huruf Kecil, Full Putih, Tanpa Label Kanan) -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-house-chimney text-white text-lg"></i>
+                        <span class="text-xl font-bold text-white tracking-tight">sebuahrumah</span>
+                    </div>
+                </div>
+
+                <!-- Kolom Pencarian -->
+                <div class="relative w-full">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass text-brand-primary"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        id="search-input"
+                        placeholder="Cari Rumah, Kost atau Lokasi..." 
+                        class="w-full pl-9 pr-9 py-2 bg-white text-sm rounded-md focus:outline-none text-brand-darkText placeholder-gray-400 shadow-inner"
+                        oninput="toggleClearButton(); filterProperties()"
+                        onkeydown="if(event.key === 'Enter') { this.blur(); }"
+                    >
+
+                    <button id="clear-search" 
+                        onclick="clearSearchInput()" 
+                        class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 active:scale-95 transition-all">
+                    <i class="fa-solid fa-circle-xmark text-base"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- KATEGORI RUMAH & KOST -->
+            <section class="bg-white px-4 py-4 shadow-sm shrink-0">
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Kategori Properti</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="cat-rumah" onclick="toggleCategory('rumah')" class="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-blue-50/50 hover:bg-blue-100/50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-brand-primary text-white flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-house text-lg"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-sm font-bold text-brand-darkText">Rumah</span>
+                                <span class="text-[10px] text-gray-500">Milik Sendiri</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button id="cat-kost" onclick="toggleCategory('kost')" class="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-amber-50/50 hover:bg-amber-100/50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-brand-accent text-white flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-door-open text-lg"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-sm font-bold text-brand-darkText">Kost</span>
+                                <span class="text-[10px] text-gray-500">Bulanan</span>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+                
+                <div id="filter-indicator" class="mt-3 flex items-center justify-between bg-brand-accentLight px-3 py-1.5 rounded-md text-xs text-brand-accent hidden">
+                    <span>Kategori: <strong id="active-category-name" class="capitalize">Semua</strong></span>
+                    <button onclick="clearCategoryFilter()" class="hover:underline font-bold">Hapus Filter</button>
+                </div>
+            </section>
+
+            <!-- AREA ISI KONTEN (BANNER & GRID PRODUK) -->
+            <div class="flex-1 p-3 pb-24">
+                
+                <!-- Promo Banner Utama -->
+                <div class="mb-4 rounded-xl overflow-hidden relative shadow-sm bg-gradient-to-r from-brand-primary to-blue-800 p-4 text-white min-h-[100px] flex flex-col justify-center">
+                    <span class="text-[9px] bg-brand-accent text-brand-darkText px-1.5 py-0.5 rounded-full font-bold w-max mb-1">PROMO EKSKLUSIF</span>
+                    <h4 class="font-bold text-sm">Temukan Hunian Impian Anda</h4>
+                    <p class="text-[10px] opacity-90 text-brand-accentLight">Layanan Profesional & Pengurusan Legalitas Terpercaya</p>
+                </div>
+
+                <!-- DAFTAR PRODUK (GRID UTAMA) -->
+                <div id="product-grid" class="grid grid-cols-2 gap-2.5 mb-4">
+                    <!-- Di-render oleh JavaScript otomatis -->
+                </div>
+
+                <div id="empty-state" class="hidden flex-col items-center justify-center py-12 text-center text-gray-400">
+                    <i class="fa-solid fa-circle-info text-4xl mb-3 text-gray-300"></i>
+                    <p class="text-sm font-medium">Properti tidak ditemukan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= HALAMAN 2: DETAIL PROPERTI ================= -->
+        <div id="detail-page" class="hidden w-full bg-white flex-col min-h-screen">
+            <!-- Header Navigasi Atas -->
+             <div id="detail-top-anchor" tabindex="-1" class="focus:outline-none"></div>
+            <div class="p-4 flex justify-between items-center bg-gray-50 border-b border-gray-100">
+                <button onclick="goBackToHome()" class="flex items-center gap-2 text-sm font-bold text-brand-darkText">
+                    <i class="fa-solid fa-arrow-left text-brand-primary"></i> Kembali
+                </button>
+                <button onclick="sharePropertyDirectly()" class="text-gray-500 hover:text-brand-primary">
+                    <i class="fa-solid fa-share-nodes text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Konten Utama Detail -->
+             <div id="image-modal" class="fixed inset-0 bg-black/95 hidden z-[9999] flex items-center justify-center">
+                <button onclick="prevSlide()" class="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl p-4 z-[10001] hidden md:flex hover:text-gray-300">
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
+
+    <button onclick="nextSlide()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl p-4 z-[10001] hidden md:flex hover:text-gray-300">
+        <i class="fa-solid fa-chevron-right"></i>
+    </button>
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-white p-3 z-[10001] bg-black/50 rounded-full">
+        <i class="fa-solid fa-xmark text-2xl"></i>
+    </button>
+    <div id="modal-carousel" class="w-full h-full flex transition-transform duration-300 ease-out touch-pan-x">
+    </div>
+</div>
+
+
+            <div class="w-full bg-white flex-1 pb-24">
+                <!-- Tampilan Gambar Utama Slide / Carousel -->
+                <div class="relative aspect-[4/3] w-full bg-gray-100 overflow-hidden">
+                    <div id="carousel-images" class="w-full h-full flex transition-transform duration-300 ease-out">
+                        <!-- Gambar carousel dimasukkan dinamis -->
+                    </div>
+                    <div class="absolute bottom-4 right-4 bg-black/60 px-3 py-1 rounded-full text-white text-xs font-semibold">
+                        <span id="current-slide-num">1</span>/<span id="total-slide-num">2</span>
+                    </div>
+                    <button onclick="prevSlide()" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <button onclick="nextSlide()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Info Harga & Judul -->
+                <div class="p-4 bg-white border-b border-gray-100">
+                    <div class="flex items-baseline gap-2 mb-1.5">
+                        <span class="text-2xl font-black text-brand-primary" id="detail-price">Rp -</span>
+                        <span class="text-xs text-gray-400" id="detail-period"></span>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="bg-brand-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider" id="detail-skema">-</span>
+                        <span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase" id="detail-type">RUMAH</span>
+                    </div>
+                    <h1 class="text-base font-bold text-brand-darkText mb-2" id="detail-title">Nama Properti</h1>
+                    <div class="flex items-center justify-between text-xs text-gray-500"><div class="flex items-start gap-1.5 w-full"><i class="fa-solid fa-location-dot text-brand-accent mt-0.5"></i><p id="detail-location" class="text-sm text-gray-600 flex-1 break-words">Lokasi</p></div>
+                        <div>★ 4.9 (Pilihan Terbaik)</div>
+                    </div>
+                </div>
+
+                <!-- Spesifikasi Kotak -->
+                <div class="p-4 bg-white border-b border-gray-100">
+                    <h3 class="text-sm font-bold text-brand-darkText mb-3">Spesifikasi Properti</h3>
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                        <div class="bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="block text-[10px] text-gray-400">K. Tidur</span><span class="block text-sm font-bold text-brand-darkText" id="spec-kt">-</span></div>
+                        <div class="bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="block text-[10px] text-gray-400">K. Mandi</span><span class="block text-sm font-bold text-brand-darkText" id="spec-km">-</span></div>
+                        <div class="bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="block text-[10px] text-gray-400">Luas Tanah</span><span class="block text-xs font-bold text-brand-darkText truncate" id="spec-lt">-</span></div>
+                        <div class="bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="block text-[10px] text-gray-400">Tipe</span><span class="block text-xs font-bold text-emerald-600 uppercase" id="spec-shm">-</span></div>
+                    </div>
+
+                    <!-- KODE TOMBOL BARU YANG DIMASUKKAN -->
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <!-- Tombol 1: DP & Angsuran -->
+                        <button onclick="openSubModal('modal-dp')" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition duration-200 text-xs flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-calculator"></i> DP & Angsuran
+                        </button>
+                        
+                        <!-- Tombol 2: Bonus -->
+                        <button onclick="openSubModal('modal-bonus')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition duration-200 text-xs flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-gift"></i> Bonus Menarik
+                        </button>
+                    </div>
+                    <!-- SELESAI TOMBOL BARU -->
+
+                </div>
+
+                <!-- Deskripsi -->
+                <div class="p-4 bg-white"><h3 class="text-sm font-bold text-brand-darkText mb-2">Deskripsi Lengkap</h3><div class="text-xs text-gray-600 leading-relaxed whitespace-pre-line" id="detail-description"></div></div>
+            </div>
+
+            <!-- BUTTON STICKY DI BAWAH BINGKAI -->
+            <div class="absolute bottom-0 inset-x-0 bg-white border-t border-gray-200 flex items-stretch h-[60px] z-50">
+                <a href="#" id="btn-chat-wa" target="_blank" class="flex-1 flex flex-col items-center justify-center text-emerald-600 bg-emerald-50 border-r border-gray-100 hover:bg-emerald-100 transition">
+                    <i class="fa-brands fa-whatsapp text-xl"></i><span class="text-[9px] font-bold mt-0.5 uppercase">Chat Agen</span>
+                </a>
+                <button onclick="sharePropertyDirectly()" class="flex-1 flex flex-col items-center justify-center text-brand-primary bg-brand-lightBg border-r border-gray-100 hover:bg-blue-100 transition">
+                    <i class="fa-solid fa-share-nodes text-lg"></i><span class="text-[9px] font-bold mt-0.5 uppercase">Bagikan</span>
+                </button>
+                <a href="#" id="btn-survey-wa" target="_blank" class="flex-[2] flex items-center justify-center gap-2 bg-brand-primary text-white font-bold text-sm hover:bg-blue-800 transition">
+                    <i class="fa-regular fa-calendar-check text-base"></i><span>Jadwal Survey</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- POP-UP SURVEI -->
+        <div id="survey-modal" class="hidden fixed flex inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-gray-100">
+                <div class="bg-gradient-to-br from-brand-primary to-blue-800 p-4 text-white text-center">
+                    <h3 class="font-bold text-base">Bantu Survei Layanan Kami</h3>
+                    <p class="text-[10px] text-blue-100 mt-0.5">Hanya 10 detik membantu kami mencocokkan unit.</p>
+                </div>
+                <div class="p-4 space-y-3.5">
+                    <!-- Pertanyaan 1: Usia -->
+                    <div>
+                        <label class="block text-xs font-bold text-brand-darkText mb-1.5">1. Rentang Usia Anda?</label>
+                        <div class="grid grid-cols-3 gap-1">
+                            
+                        <label class="flex items-center gap-1 px-1.5 py-1.5 border border-gray-200 rounded-lg text-[10px] font-semibold cursor-pointer"><input type="radio" name="survey-age" value="< 25 Tahun" checked class="accent-brand-primary"><span>&lt; 25 Thn</span></label>
+                        <label class="flex items-center gap-1 px-1.5 py-1.5 border border-gray-200 rounded-lg text-[10px] font-semibold cursor-pointer"><input type="radio" name="survey-age" value="25 - 35 Tahun" class="accent-brand-primary"><span>25-35 Thn</span></label> 
+                        <label class="flex items-center gap-1 px-1.5 py-1.5 border border-gray-200 rounded-lg text-[10px] font-semibold cursor-pointer"><input type="radio" name="survey-age" value="&gt; 35 Tahun" class="accent-brand-primary"><span>&gt; 35 Thn</span></label>
+                        </div>
+                    </div>
+                    <!-- Pertanyaan 2: Tujuan Pembelian -->
+                    <div>
+                        <label class="block text-xs font-bold text-brand-darkText mb-1">2. Apa Tujuan Pembelian?</label>
+                        <select id="survey-purpose" class="w-full text-xs font-semibold p-2 bg-gray-50 border border-gray-200 rounded-lg">
+                            <option value="Tempat Tinggal Pribadi">Tempat Tinggal Pribadi</option>
+                            <option value="Investasi Jangka Panjang">Investasi Jangka Panjang</option>
+                        </select>
+                    </div>
+                    <!-- Pertanyaan 3: Kota Asal (BAGIAN BARU DI SINI, CUY) -->
+                     <div>
+                        <label class="block text-xs font-bold text-brand-darkText mb-1">3. Kota/Kabupaten Saat Ini?</label>
+                        <input type="text" id="survey-city" placeholder="Contoh: Pontianak / Kubu Raya" class="w-full text-xs font-semibold p-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-primary" required>
+                    </div>
+                    <button onclick="submitSurvey()" class="w-full bg-brand-primary text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-blue-800 transition">Lihat Detail Properti</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOTIFIKASI TOAST -->
+        <div id="toast" class="opacity-0 pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 z-50 bg-black/80 text-white px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300">
+            <span id="toast-message">Tautan Disalin!</span>
+        </div>
+
+        <div id="modal-dp" class="hidden fixed flex inset-0 bg-black/60 backdrop-blur-sm z-[100] items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl">
+            <h3 class="text-base font-bold text-brand-darkText border-b pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-amber-500"></i> Simulasi DP & Angsuran
+            </h3>
+            <div class="mt-4 space-y-3 text-xs text-gray-600">
+                    <p><strong>Unit:</strong> <span id="sub-dp-title" class="text-brand-darkText font-semibold">-</span></p>
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-amber-900 space-y-1">
+                        <p class="font-bold mb-1 text-sm text-amber-800">Estimasi Pembiayaan KPR:</p>
+                        <p>• DP : <span id="kpr-dp" class="font-bold">-</span></p>
+                        <p>• Angsuran 10 Tahun: <span id="kpr-10th" class="font-bold">-</span> / bln</p>
+                        <p>• Angsuran 15 Tahun: <span id="kpr-15th" class="font-bold">-</span> / bln</p>
+                        <p>• Angsuran 20 Tahun: <span id="kpr-20th" class="font-bold">-</span> / bln</p>
+                    </div>
+                    <p class="text-[10px] text-gray-400 italic">*Nilai di atas merupakan estimasi bank umum. Detail presisi silakan tanyakan via Chat Agen.</p>
+                </div>
+            <button onclick="closeSubModal('modal-dp')" class="mt-5 w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 rounded-xl text-xs transition uppercase">Tutup</button>
+        </div>
+    </div>
+
+    <div id="modal-bonus" class="hidden fixed flex inset-0 bg-black/60 backdrop-blur-sm z-[100] items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl">
+                <h3 class="text-base font-bold text-brand-darkText border-b pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-gift text-emerald-500"></i> Bonus Spesial Unit
+                </h3>
+                <div class="mt-4 space-y-3 text-xs text-gray-600">
+                    <p>Membeli unit <strong id="sub-bonus-title" class="text-brand-darkText">-</strong> bulan ini otomatis gratis:</p>
+                    
+                    <div id="kpr-bonus-list" class="bg-emerald-50 p-3.5 rounded-xl border border-emerald-200 text-emerald-900 space-y-2">
+                        </div>
+                    
+                </div>
+                <button onclick="closeSubModal('modal-bonus')" class="mt-5 w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 rounded-xl text-xs transition uppercase">Tutup</button>
+            </div>
+        </div>
+
+    </div>
+
+    <footer id="web-footer" class="fixed bottom-0 left-0 right-0 w-full bg-gray-900 text-gray-400 py-2 text-center text-[10px] border-t border-gray-800 z-50 line-height-[1]">
+        <div class="container mx-auto px-4 flex items-center justify-center gap-1">
+            <p>&copy; 2026 <span class="text-amber-500 font-semibold">Nusagriya</span>. All Rights Reserved.</p>
+            <span class="text-gray-600">•</span>
+            <p class="text-gray-500">Solusi Hunian Terbaik.</p>
+        </div>
+    </footer>
+
+    <!-- 1. TOMBOL BULAT MELAYANG (DI POJOK KANAN BAWAH) --> 
+     <head>
+    <style>
+        #chat-toggle-btn, #chat-window {
+            display: none !important;
+        }
+    </style>
+</head> 
+    <button id="chat-toggle-btn" onclick="toggleChatWindow()" class="fixed bottom-6 right-6 bg-brand-primary text-white p-4 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all z-50 flex items-center justify-center">
+            <i class="fa-solid fa-comment-dots text-xl"></i>
+        </button>
+
+    <!-- 2. KOTAK WIDGET CHAT (APLIKASI CHAT MINI) -->
+        <div id="chat-window" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 w-[350px] h-[450px] bg-gray-50 rounded-lg shadow-2xl flex flex-col overflow-hidden z-50 border border-gray-200">
+            <!-- Header Kotak Chat -->
+            <div class="bg-brand-primary p-4 text-white flex justify-between items-center shadow-md">
+                <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span class="font-semibold text-sm">Daniya - Admin AI Nusagriya</span>
+                </div>
+
+                <button onclick="hapusChat()" title="Hapus Riwayat" class="hover:text-red-300 text-xs px-2">
+        <i class="fa-solid fa-trash-can"></i>
+    </button>
+                <button onclick="toggleChatWindow()" class="hover:text-gray-200 text-lg">✕</button>
+            </div>
+
+            <!-- Area Pesan (Tempat balon chat muncul) -->
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm">
+                <div class="flex flex-col items-start">
+                    <div class="bg-white text-brand-darkText p-3 rounded-lg rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
+                        Halo! Selamat datang di Nusagriya. Saya Daniya, admin AI yang siap bantu nyari rumah atau kost impian di daerah Kubu Raya & Pontianak. Mau cari di daerah mana nih? 😊
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom Input Teks (Paling Bawah Kotak Chat) -->
+            <div class="p-3 bg-white border-t border-gray-200 flex items-center space-x-2">
+                <input type="text" id="chat-input" onkeydown="if(event.key === 'Enter') kirimPesanKeAI()" placeholder="Ketik pertanyaan di sini..." class="flex-1 px-3 py-2 bg-gray-100 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary text-brand-darkText">
+                <button onclick="kirimPesanKeAI()" class="bg-brand-primary text-white px-3 py-2 rounded-md hover:bg-opacity-90 active:scale-95 transition-all">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+    <!-- 3. LOGIKA JAVASCRIPT UNTUK EMBED GEMINI API -->
+        <script>
+    // 1. Gunakan token AQ milik Wak
+    const GEMINI_API_KEY = "kode api key disini"; 
+    let chatHistory = [];
+    // Memuat chat dari penyimpanan browser saat halaman dibuka
+window.onload = function() {
+    const savedChat = localStorage.getItem("daniya_chat_history");
+    if (savedChat) {
+        chatHistory = JSON.parse(savedChat);
+        const messageContainer = document.getElementById("chat-messages");
+        messageContainer.innerHTML = ""; // Bersihkan tampilan awal
+        
+        chatHistory.forEach(msg => {
+            const isUser = msg.role === "user";
+            messageContainer.innerHTML += `
+                <div class="flex ${isUser ? 'justify-end' : 'justify-start'} mb-4">
+                    <div class="${isUser ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 border border-gray-200'} rounded-lg p-3 max-w-xs shadow-sm">
+                        ${msg.parts[0].text}
+                    </div>
+                </div>
+            `;
+        });
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+};
+function hapusChat() {
+    if (confirm("Yakin mau hapus semua riwayat obrolan, Wak?")) {
+        // 1. Kosongkan memori di browser
+        localStorage.removeItem("daniya_chat_history");
+        
+        // 2. Reset array chat di kodingan
+        chatHistory = [];
+        
+        // 3. Bersihkan layar
+        document.getElementById("chat-messages").innerHTML = "";
+        
+        alert("Riwayat sudah bersih, Mang!");
+    }
+}
+    // DATABASE KATALOG PERUMAHAN NUSAGRIYA (Silakan sesuaikan isi datanya, Wak!)
+const DATABASE_PERUMAHAN = [
+    {
+        id: 1,
+        nama: "Nusagriya Luxury Residence",
+        lokasi: "Jl. Jendral Urip, Pontianak Kota",
+        tipe: "Tipe 120 (Mewah Modern)",
+        harga: "Rp 1,2 Miliar",
+        spek_kamar: "3 Kamar Tidur, 2 Kamar Mandi",
+        spek_pintu: "Kayu solid warna putih premium (bukan kaca, tidak tembus pandang)",
+        spek_lain: "Lantai granit 60x60, Carport 2 mobil, struktur beton bertulang, plafon gypsum mewah."
+    },
+    {
+        id: 2,
+        nama: "Nusagriya Green Garden",
+        lokasi: "Jl. Paris 2, Pontianak Tenggara",
+        tipe: "Tipe 70 (Minimalis Sederhana)",
+        harga: "Rp 650 Juta",
+        spek_kamar: "2 Kamar Tidur, 1 Kamar Mandi",
+        spek_pintu: "Kayu panel fabrikasi warna putih",
+        spek_lain: "Lantai keramik 40x40, sisa tanah belakang luas, cocok untuk keluarga muda."
+    },
+    {
+        id: 3,
+        nama: "Nusagriya Riverside Cluster",
+        lokasi: "Kubu Raya (Dekat Sungai Kapuas)",
+        tipe: "Tipe 90 (Konsep Resort)",
+        harga: "Rp 850 Juta",
+        spek_kamar: "3 Kamar Tidur, 2 Kamar Mandi",
+        spek_pintu: "Kayu solid engsel pivot modern",
+        spek_lain: "View sungai, keamanan 24 jam, dekat dengan pusat kuliner."
+    },
+    { id: 4, nama: "Perumahan 4", lokasi: "Lokasi 4", tipe: "Tipe 4", harga: "Harga 4", spek_kamar: "Kamar 4", spek_pintu: "Pintu 4", spek_lain: "Spek 4" },
+    { id: 5, nama: "Perumahan 5", lokasi: "Lokasi 5", tipe: "Tipe 5", harga: "Harga 5", spek_kamar: "Kamar 5", spek_pintu: "Pintu 5", spek_lain: "Spek 5" },
+    { id: 6, nama: "Perumahan 6", lokasi: "Lokasi 6", tipe: "Tipe 6", harga: "Harga 6", spek_kamar: "Kamar 6", spek_pintu: "Pintu 6", spek_lain: "Spek 6" },
+    { id: 7, nama: "Perumahan 7", lokasi: "Lokasi 7", tipe: "Tipe 7", harga: "Harga 7", spek_kamar: "Kamar 7", spek_pintu: "Pintu 7", spek_lain: "Spek 7" },
+    { id: 8, nama: "Perumahan 8", lokasi: "Lokasi 8", tipe: "Tipe 8", harga: "Harga 8", spek_kamar: "Kamar 8", spek_pintu: "Pintu 8", spek_lain: "Spek 8" },
+    { id: 9, nama: "Perumahan 9", lokasi: "Lokasi 9", tipe: "Tipe 9", harga: "Harga 9", spek_kamar: "Kamar 9", spek_pintu: "Pintu 9", spek_lain: "Spek 9" },
+    { id: 10, nama: "Perumahan 10", lokasi: "Lokasi 10", tipe: "Tipe 10", harga: "Harga 10", spek_kamar: "Kamar 10", spek_pintu: "Pintu 10", spek_lain: "Spek 10" },
+    { id: 11, nama: "Perumahan 11", lokasi: "Lokasi 11", tipe: "Tipe 11", harga: "Harga 11", spek_kamar: "Kamar 11", spek_pintu: "Pintu 11", spek_lain: "Spek 11" },
+    { id: 12, nama: "Perumahan 12", lokasi: "Lokasi 12", tipe: "Tipe 12", harga: "Harga 12", spek_kamar: "Kamar 12", spek_pintu: "Pintu 12", spek_lain: "Spek 12" },
+    { id: 13, nama: "Perumahan 13", lokasi: "Lokasi 13", tipe: "Tipe 13", harga: "Harga 13", spek_kamar: "Kamar 13", spek_pintu: "Pintu 13", spek_lain: "Spek 13" },
+    { id: 14, nama: "Perumahan 14", lokasi: "Lokasi 14", tipe: "Tipe 14", harga: "Harga 14", spek_kamar: "Kamar 14", spek_pintu: "Pintu 14", spek_lain: "Spek 14" },
+    { id: 15, nama: "Perumahan 15", lokasi: "Lokasi 15", tipe: "Tipe 15", harga: "Harga 15", spek_kamar: "Kamar 15", spek_pintu: "Pintu 15", spek_lain: "Spek 15" },
+    { id: 16, nama: "Perumahan 16", lokasi: "Lokasi 16", tipe: "Tipe 16", harga: "Harga 16", spek_kamar: "Kamar 16", spek_pintu: "Pintu 16", spek_lain: "Spek 16" },
+    { id: 17, nama: "Perumahan 17", lokasi: "Lokasi 17", tipe: "Tipe 17", harga: "Harga 17", spek_kamar: "Kamar 17", spek_pintu: "Pintu 17", spek_lain: "Spek 17" },
+    { id: 18, nama: "Perumahan 18", lokasi: "Lokasi 18", tipe: "Tipe 18", harga: "Harga 18", spek_kamar: "Kamar 18", spek_pintu: "Pintu 18", spek_lain: "Spek 18" },
+    { id: 19, nama: "Perumahan 19", lokasi: "Lokasi 19", tipe: "Tipe 19", harga: "Harga 19", spek_kamar: "Kamar 19", spek_pintu: "Pintu 19", spek_lain: "Spek 19" },
+    { id: 20, nama: "Perumahan 20", lokasi: "Lokasi 20", tipe: "Tipe 20", harga: "Harga 20", spek_kamar: "Kamar 20", spek_pintu: "Pintu 20", spek_lain: "Spek 20" }
+];
+    // Endpoint bersih tanpa parameter ?key=
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
+    function toggleChatWindow() {
+        const chatWindow = document.getElementById("chat-window");
+        chatWindow.classList.toggle("hidden");
+    }
+
+    async function kirimPesanKeAI() {
+    const inputElement = document.getElementById("chat-input");
+    const messageContainer = document.getElementById("chat-messages");
+    const userText = inputElement.value.trim();
+
+    const tombolKirim = document.querySelector("button[onclick='kirimPesanKeAI()']");
+    if (userText === "") return;
+    tombolKirim.disabled = true; // Kunci tombol agar tidak bisa diklik lagi
+    tombolKirim.classList.add("opacity-50"); // Kasih efek redup
+    // ----------------------------------
+
+    if (userText === "") return;
+
+    // Tampilkan pesan User di layar
+    messageContainer.innerHTML += `
+        <div class="flex justify-end mb-4">
+            <div class="bg-blue-600 text-white rounded-lg p-3 max-w-xs shadow-md">
+                ${userText}
+            </div>
+        </div>
+    `;
+    
+    inputElement.value = "";
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+
+    // Simpan ke memori chat history
+    chatHistory.push({
+        role: "user",
+        parts: [{ text: userText }]
+    });
+    localStorage.setItem("daniya_chat_history", JSON.stringify(chatHistory));
+    // =========================================================================
+    // OTOMATISASI: Mengonversi 20 data perumahan di array menjadi teks instruksi AI
+    // =========================================================================
+    let teksKatalogPerumahan = "";
+    DATABASE_PERUMAHAN.forEach((item) => {
+        teksKatalogPerumahan += `
+        Nama Proyek: ${item.nama}
+        - Lokasi: ${item.lokasi}
+        - Tipe Rumah: ${item.tipe}
+        - Harga Unit: ${item.harga}
+        - Jumlah Kamar: ${item.spek_kamar}
+        - Spesifikasi Pintu: ${item.spek_pintu}
+        - Spesifikasi Lainnya: ${item.spek_lain}
+        -----------------------------------`;
+    });
+
+    const loadingId = "loading-" + Date.now();
+    messageContainer.innerHTML += `
+        <div id="${loadingId}" class="flex justify-start mb-4 animate-pulse">
+            <div class="bg-gray-200 text-gray-700 rounded-lg p-3 max-w-xs shadow-sm">
+                <em>Daniya sedang mengetik...</em>
+            </div>
+        </div>
+    `;
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY
+            },
+            body: JSON.stringify({
+                systemInstruction: {
+    parts: [{
+        text: `Kamu adalah Daniya, asisten virtual Nusagriya Build & Studio yang ramah, santai, dan solutif.
+        
+        GAYA BAHASA (WAJIB):
+        - Gunakan bahasa percakapan sehari-hari yang akrab (seperti ngobrol sama teman), gunakan panggilan 'Wak' atau 'Mang'.
+        - JAWABAN HARUS SANGAT SINGKAT (Maksimal 2-3 kalimat). Jangan pernah memberikan jawaban panjang atau bertele-tele.
+        - Langsung ke poin yang ditanya. Jika perlu detail, baru berikan poin-poinnya saja.
+        - Jika suasana obrolan pas, boleh selipkan sedikit basa-basi santai khas Pontianak agar terasa lebih humanis.
+
+        DATABASE PROYEK:
+        (Gunakan data ini untuk menjawab pertanyaan klien)
+        ${teksKatalogPerumahan}
+
+        ATURAN PENTING:
+        - Jangan berikan jawaban seperti robot atau esai sekolah.
+        - Kalau klien tanya harga, sebutkan harganya dengan santai.
+        - Jika klien tanya spek, sebutkan 1-2 poin saja yang paling menonjol.
+        - Selalu arahkan untuk lanjut ngobrol di WhatsApp kalau klien butuh info lebih detail.`
+    }]
+},
+                contents: chatHistory
+            })
+        });
+
+        const loadingElement = document.getElementById(loadingId);
+        if (loadingElement) loadingElement.remove();
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Detail Respon Eror:", errorData);
+            throw new Error(`Status Server: ${response.status}`);
+        }
+
+        const data = await response.json();
+        let jawabanAI = data.candidates[0].content.parts[0].text;
+
+        // Simpan balasan Daniya ke memori chat history
+        chatHistory.push({
+            role: "model",
+            parts: [{ text: jawabanAI }]
+        });
+        localStorage.setItem("daniya_chat_history", JSON.stringify(chatHistory));
+        // Pengaturan Tautan ke WhatsApp Admin
+        const NOMOR_WA_ADMIN = "6281234567890"; // <-- JANGAN LUPA GANTI NOMOR ASLI WAK
+        const teksWA = encodeURIComponent(`Halo Admin Nusagriya, saya ingin konsultasi lebih lanjut mengenai perumahan setelah mengobrol dengan Daniya.`);
+        const linkWhatsApp = `https://api.whatsapp.com/send?phone=${NOMOR_WA_ADMIN}&text=${teksWA}`;
+
+        // Tampilkan balasan teks + Tombol WA
+        messageContainer.innerHTML += `
+            <div class="flex justify-start mb-4 flex-col items-start">
+                <div class="bg-gray-100 text-gray-800 rounded-lg p-3 max-w-xs shadow-sm border border-gray-200 mb-2">
+                    ${jawabanAI}
+                </div>
+                <a href="${linkWhatsApp}" target="_blank" class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1.5 px-3 rounded-full shadow transition-all duration-200 animate-bounce">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.002 5.219 5.221 0 11.63 0c3.106.001 6.024 1.211 8.217 3.413 2.193 2.203 3.4 5.13 3.399 8.241-.003 6.412-5.222 11.631-11.631 11.631-2.006-.001-3.97-.521-5.717-1.514L0 24zm6.59-4.846c1.657.982 3.311 1.503 5.038 1.504 5.373 0 9.746-4.341 9.749-9.714.002-2.603-1.01-5.05-2.854-6.897C16.68 2.199 14.234 1.185 11.634 1.185 6.262 1.185 1.89 5.526 1.887 10.9c-.001 1.791.474 3.493 1.375 5.01l-.994 3.633 3.78-.989zM15.901 13.06c-.328-.164-1.94-.959-2.242-1.07-.302-.11-.522-.164-.742.164-.22.329-.851 1.07-1.042 1.29-.191.22-.383.246-.711.082-.328-.164-1.385-.51-2.637-1.63-1.003-.895-1.68-2.001-1.877-2.33-.197-.329-.022-.507.142-.67.147-.147.328-.384.492-.575.164-.191.219-.329.328-.548.11-.219.055-.411-.027-.575-.082-.164-.742-1.786-1.016-2.443-.267-.64-.539-.553-.742-.563-.192-.009-.411-.011-.63-.011-.22 0-.575.082-.876.411-.302.329-1.151 1.123-1.151 2.74s1.178 3.178 1.342 3.4c.164.22 2.317 3.537 5.612 4.962.784.339 1.396.541 1.873.692.788.251 1.505.216 2.071.131.63-.094 1.94-.794 2.215-1.562.274-.767.274-1.423.192-1.562-.082-.139-.274-.22-.602-.384z"/>
+                    </svg>
+                    Konsultasi via WA
+                </a>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error("Error Detail:", error);
+        const loadingElement = document.getElementById(loadingId);
+        if (loadingElement) loadingElement.remove();
+
+        chatHistory.pop(); // Hapus memori terakhir jika error
+
+        messageContainer.innerHTML += `
+            <div class="flex justify-start mb-4">
+                <div class="bg-red-100 text-red-700 rounded-lg p-3 max-w-xs shadow-sm border border-red-200">
+                    Waduh, Daniya lagi antre jawab pesan nih, Mang. Tunggu sebentar ya, coba lagi dalam 1 menit! 😊
+                </div>
+            </div>
+        `;
+    } finally {
+        // --- INI KODENYA ---
+        const tombolKirim = document.querySelector("button[onclick='kirimPesanKeAI()']");
+        if (tombolKirim) {
+            tombolKirim.disabled = false;
+            tombolKirim.classList.remove("opacity-50");
+        }
+    }
+
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+}
+
+function hapusChat() {
+        if (confirm("Yakin mau hapus semua riwayat obrolan, Wak?")) {
+            localStorage.removeItem("daniya_chat_history");
+            chatHistory = [];
+            document.getElementById("chat-messages").innerHTML = `
+                <div class="flex flex-col items-start">
+                    <div class="bg-white text-brand-darkText p-3 rounded-lg rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
+                        Halo! Selamat datang di Nusagriya. Saya Daniya, admin AI yang siap bantu nyari rumah atau kost impian di daerah Kubu Raya & Pontianak. Mau cari di daerah mana nih? 😊
+                    </div>
+                </div>
+            `;
+            alert("Riwayat sudah bersih, Mang!");
+        }
+    }
+
+</script>
+
+    <!-- SCRIPT DATA & LOGIC CONTROL -->
+    <script>
+        const CONTACT_AGENCY_WA = "6285183139496"; 
+
+        /* ================= KUMPULAN DATA PROPERTI (15 RUMAH & 3 KOST) ================= */
+        const properties = [
+            // --- 15 DATA RUMAH ---
+            {
+                id: 1,
+                title: "Rumah Serdam Akses Jalan Utama",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 182 Juta",
+                // TAMBAHKAN DATA BONUS DI SINI (Gunakan tanda kurung siku [ ])
+                bonus: [
+                    "Air Sumur Bor",
+                    "Kanopi",
+                    "Carport"
+                ],
+                location: "Kubu Raya - Serdam",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 1%",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/sbr-serdam/sbr-serdam-1.jpeg",
+                "aset/sbr-serdam/sbr-serdam-2.jpeg",
+                "aset/sbr-serdam/sbr-serdam-3.jpeg",
+                "aset/sbr-serdam/sbr-serdam-4.jpeg",
+                "aset/sbr-serdam/sbr-serdam-5.jpeg",
+                "aset/sbr-serdam/sbr-serdam-6.jpeg",
+                "aset/sbr-serdam/sbr-serdam-7.jpeg",
+                "aset/sbr-serdam/sbr-serdam-8.jpeg",
+                "aset/sbr-serdam/sbr-serdam-9.jpeg",            
+            ],
+                specs: { kt: "2", km: "1", lt: "7,5x15 m", tipe: "36" },
+                description: "Rumah yang berlokasi langsung di pinggir jalan utama serdam."
+            },
+            {
+                id: 2,
+                title: "Rumah PAL 8 - Dekat Pusat Kota",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 182 Juta",
+                // TAMBAHKAN DATA BONUS DI SINI (Gunakan tanda kurung siku [ ])
+                bonus: [
+                    "PABM (Air Bersih Mandiri)",
+                    "Carport"
+                ],
+                location: "Kubu Raya",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 1%",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/barunia6/barunia6-1.jpeg",
+                        "aset/barunia6/barunia6-2.jpeg",
+                        "aset/barunia6/barunia6-3.jpeg",
+                        "aset/barunia6/barunia6-4.jpeg",
+                        "aset/barunia6/barunia6-5.jpeg",
+                        "aset/barunia6/barunia6-6.jpeg",
+                        "aset/barunia6/barunia6-7.jpeg",
+                        "aset/barunia6/barunia6-8.jpeg",
+                        "aset/barunia6/barunia6-9.jpeg"
+                ],
+                specs: { kt: "2", km: "1", lt: "7x14,8 m", tipe: "36" },
+                description: "Rumah yang berlokasi di PAL 8, dekat dengan sekolah Al-Fityan, dan sangat dekat menuju kota, terutama daerah, Sungai Jawi, Ampera, Kota Baru."
+            },
+            {
+                id: 3,
+                title: "Rumah Parit Bugis - Gg. Akasia",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Komersil", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 405 Juta",
+                location: "Kubu Raya",
+                sold: "Tersedia",
+                kpr: {
+                    dp: "10-20% (estimasi 10%)",
+                    th10: "Rp 4.668.750",
+                    th15: "Rp 3.631.250",
+                    th20: "Rp 3.112.500",
+                    
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/grand-akasia/grand-akasia-1.jpeg",
+                    "aset/grand-akasia/grand-akasia-2.jpeg",
+                    "aset/grand-akasia/grand-akasia-3.jpeg",
+                    "aset/grand-akasia/grand-akasia-4.jpeg",
+                    "aset/grand-akasia/grand-akasia-5.jpeg",
+                    "aset/grand-akasia/grand-akasia-6.jpeg",
+                    "aset/grand-akasia/grand-akasia-7.jpeg",
+                    "aset/grand-akasia/grand-akasia-8.jpeg",
+                    "aset/grand-akasia/grand-akasia-9.jpeg",
+                    "aset/grand-akasia/grand-akasia-10.jpeg"
+                ],
+                specs: { kt: "2", km: "2", lt: "8x19 m", tipe: "60" },
+                description: "Lokasinya di A. Yani 2, parit bugis, ramai penduduk dan dekat kemana saja ataupun fasilitas publik."
+            },
+            {
+                id: 4,
+                title: "Rumah di Serdam Dekat Korpri",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 182 Juta",
+                location: "Kubu Raya",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 25 Juta (Termasuk Biaya Akad)",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/daraya-serdam/daraya-serdam-1.jpeg",
+                    "aset/daraya-serdam/daraya-serdam-2.jpeg",
+                    "aset/daraya-serdam/daraya-serdam-3.jpeg",
+                    "aset/daraya-serdam/daraya-serdam-4.jpeg",
+                    "aset/daraya-serdam/daraya-serdam-5.jpeg",
+                    "aset/daraya-serdam/daraya-serdam-6.jpeg"
+                ],
+                specs: { kt: "2", km: "1", lt: "7x19 m", tipe: "36" },
+                description: "Ini adalah rumah subsidi di serdam yang dari segi harga sangat bersaing dengan perumahan lain disekitarnya"
+            },
+            {
+                id: 5,
+                title: "Rumah di Selat Panjang",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 182 Juta",
+                location: "Kubu Raya - Siantan",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 5 Juta (Termasuk Biaya AKad)",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/mega-bintang/mega-bintang-1.jpeg",
+                "aset/mega-bintang/mega-bintang-2.jpeg",
+                "aset/mega-bintang/mega-bintang-3.jpeg",
+                "aset/mega-bintang/mega-bintang-4.jpeg",
+                "aset/mega-bintang/mega-bintang-5.jpeg",
+                "aset/mega-bintang/mega-bintang-6.jpeg",
+                "aset/mega-bintang/mega-bintang-7.jpeg",
+                "aset/mega-bintang/mega-bintang-8.jpeg",
+                "aset/mega-bintang/mega-bintang-9.jpeg"
+
+                ],
+                specs: { kt: "2", km: "1", lt: "8x14,5 m", tipe: "36" },
+                description: "Lokasinya dekat dari simpang 4 siantan dan 28 oktober"
+            },
+            {
+                id: 6,
+                title: "Rumah di Wonodadi 2, Ayani",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 182 Juta",
+                location: "Kubu Raya",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 1%",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/galaxy-sbr/galaxy-sbr-1.jpeg",
+                    "aset/galaxy-sbr/galaxy-sbr-2.jpeg",
+                    "aset/galaxy-sbr/galaxy-sbr-3.jpeg",
+                    "aset/galaxy-sbr/galaxy-sbr-4.jpeg",
+                    "aset/galaxy-sbr/galaxy-sbr-5.jpeg",
+                    "aset/galaxy-sbr/galaxy-sbr-6.jpeg",
+                    "aset/galaxy-sbr/galaxy-sbr-7.jpeg",
+                    "aset/galaxy-sbr/galaxy-sbr-8.jpeg"
+                ],
+                specs: { kt: "2", km: "1", lt: "9x12,5 m", tipe: "36" },
+                description: "Lokasi yang sangat bagus dan potensi berkembang kedepannya sangat bagus, dekat dengan pusat pemerintahan Kubu Raya, dekat dengan Gaia Mall dan yang paling dekat dengan bandara"
+            },
+            {
+                id: 7,
+                title: "Rumah Deskap - SBR 10",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 182 Juta",
+                bonus: [
+                    "PDAM",
+                ],
+                location: "Kubu Raya",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 5 Juta",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/sbr10t5/sbr10-t5-1.jpeg",
+                "aset/sbr10t5/sbr10-t5-2.jpeg",
+                "aset/sbr10t5/sbr10-t5-3.jpeg",
+                "aset/sbr10t5/sbr10-t5-4.jpeg",
+                "aset/sbr10t5/sbr10-t5-5.jpeg",
+                "aset/sbr10t5/sbr10-t5-6.jpeg",
+                "aset/sbr10t5/sbr10-t5-7.jpeg"
+                
+                ],
+                specs: { kt: "2", km: "1", lt: "9x11,5 m", tipe: "36" },
+                description: "Rumah di desa kapur masih layak untuk jadi pilihan terutama perumahan ini karena sudah dapat fasilitas air PDAM dan desa kapur yang terkenal sudah ramai, apa aja ada."
+            },
+            {
+                id: 8,
+                title: "Rumah di Kota Pontianak, Siantan",
+                type: "rumah",
+                price: "Rp 182 Juta",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                location: "Pontianak Utara",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 500 Ribu",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/bintang-flora/bintang-flora-1.jpeg",
+                "aset/bintang-flora/bintang-flora-2.jpeg",
+                "aset/bintang-flora/bintang-flora-3.jpeg",
+                "aset/bintang-flora/bintang-flora-4.jpeg",
+                "aset/bintang-flora/bintang-flora-5.jpeg",
+                "aset/bintang-flora/bintang-flora-6.jpeg",
+                "aset/bintang-flora/bintang-flora-7.jpeg",
+                "aset/bintang-flora/bintang-flora-8.jpeg"
+                ],
+                specs: { kt: "2", km: "1", lt: "8x16 m", tipe: "36" },
+                description: "Salah satu dari sedikit rumah subsidi yang ada di Pontianak, lokasinya di Jl. Flora."
+            },
+            {
+                id: 9,
+                title: "Rumah di Sungai Rengas",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 182 Juta",
+                location: "Kubu Raya",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 1%",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/grand-rafi/grand-rafi-1.jpeg",
+                    "aset/grand-rafi/grand-rafi-2.jpeg",
+                    "aset/grand-rafi/grand-rafi-3.jpeg",
+                    "aset/grand-rafi/grand-rafi-4.jpeg",
+                    "aset/grand-rafi/grand-rafi-5.jpeg"
+                ],
+                specs: { kt: "2", km: "1", lt: "7x20 m", tipe: "36" },
+                description: "Rumah yang berlokasi di sungai rengas ini patut jadi pilihan untuk yang memiliki aktifitas di area jeruju dan pal dan dengan harga yang menarik."
+            },
+            {
+                id: 10,
+                title: "Rumah di Siantan - Panca Bakti",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 182 Juta",
+                location: "Pontianak Timur",
+                sold: "Indent",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 1%",
+                    th10: "Rp 1.901.000",
+                    th15: "Rp 1.414.500",
+                    th20: "Rp 1.178.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/bintang-panca/bintang-panca-1.jpeg",
+                "aset/bintang-panca/bintang-panca-2.jpeg",
+                "aset/bintang-panca/bintang-panca-3.jpeg",
+                "aset/bintang-panca/bintang-panca-4.jpeg",
+                "aset/bintang-panca/bintang-panca-5.jpeg",
+                "aset/bintang-panca/bintang-panca-6.jpeg"
+
+                ],
+                specs: { kt: "2", km: "1", lt: "8,5x16 m", tipe: "36" },
+                description: "Rumah di Kota Pontianak yang dekat keramaian dan pusat kota."
+            },
+            {
+                id: 11,
+                title: "Rumah Type 45 di Ampera (Jl. Karya)",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Komersil", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 475 Juta",
+                location: "Kubu Raya",
+                sold: "Tersedia",
+                // TAMBAHKAN DATA KPR DI SINI
+                kpr: {
+                    dp: "Rp 10-20% (estimasi 10%)",
+                    th10: "Rp 5.187.000",
+                    th15: "Rp 4.085.500",
+                    th20: "Rp 3.576.000"
+                },
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["aset/grand-alfira/grand-alfira-1.jpeg",
+                "aset/grand-alfira/grand-alfira-2.jpeg",
+                "aset/grand-alfira/grand-alfira-3.jpeg",
+                "aset/grand-alfira/grand-alfira-4.jpeg",
+                "aset/grand-alfira/grand-alfira-5.jpeg",
+                "aset/grand-alfira/grand-alfira-6.jpeg",
+                "aset/grand-alfira/grand-alfira-7.jpeg",
+                "aset/grand-alfira/grand-alfira-8.jpeg"
+
+                ],
+                specs: { kt: "2", km: "2", lt: "8x17,5 m", tipe: "45" },
+                description: "Lokasinya di Ampera, tepatnya di Jl. Karya. Statusnya memang Kubu Raya tapi perbatasan Pontianak, sangat-sangat dekat ke pusat Kota."
+            },
+            
+            /*{
+                id: 12,
+                title: "Hunian Cluster Eco Green - Unit 12",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 490 Juta",
+                location: "Pontianak Selatan",
+                sold: "Tersedia",
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&q=80&w=600"],
+                specs: { kt: "3", km: "2", lt: "160 m²", tipe: "36" },
+                description: "Deskripsi lengkap rumah ke-12 silakan isi di sini."
+            },
+            {
+                id: 13,
+                title: "Rumah Minimalis Tropis - Unit 13",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 410 Juta",
+                location: "Pontianak Barat",
+                sold: "Tersedia",
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&q=80&w=600"],
+                specs: { kt: "3", km: "2", lt: "145 m²", tipe: "36" },
+                description: "Deskripsi lengkap rumah ke-13 silakan isi di sini."
+            },
+            {
+                id: 14,
+                title: "Rumah Semi-Furnished - Unit 14",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 550 Juta",
+                location: "Pontianak Tenggara",
+                sold: "Tersedia",
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&q=80&w=600"],
+                specs: { kt: "3", km: "2", lt: "150 m²", tipe: "36" },
+                description: "Deskripsi lengkap rumah ke-14 silakan isi di sini."
+            },
+            {
+                id: 15,
+                title: "Rumah Elegant Type 36 - Unit 15",
+                type: "rumah",
+                typeDetail: "Cash / Kredit",
+                skema: "Subsidi", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 185 Juta",
+                location: "Kubu Raya",
+                sold: "Sisa 3 Unit",
+                icon: "fa-house",
+                bgColor: "from-blue-600 to-indigo-700",
+                images: ["https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600"],
+                specs: { kt: "2", km: "1", lt: "135 m²", tipe: "36" },
+                description: "Deskripsi lengkap rumah ke-15 silakan isi di sini."
+            },*/
+            
+            // --- 3 DATA KOST ---
+            /*{
+                id: 16,
+                title: "Kost Exclusive Serdam Putri - Unit 1",
+                type: "kost",
+                typeDetail: "Pertahun",
+                skema: "PUTRI", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 1.5 Jt",
+                period: "/ bln",
+                location: "Sungai Raya Dalam",
+                sold: "6 Kamar Kosong",
+                icon: "fa-door-open",
+                bgColor: "from-amber-600 to-yellow-700",
+                images: ["https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600"],
+                specs: { kt: "1", km: "1", lt: "12 m²", tipe: "" },
+                description: "Fasilitas lengkap setara hotel, dekat akses publik dan aman."
+            },
+            {
+                id: 17,
+                title: "Kost Nyaman Putra Strategis - Unit 2",
+                type: "kost",
+                typeDetail: "Pertahun",
+                skema: "PUTRI", // <--- TAMBAHKAN BARIS INI
+                price: "Rp 800 Ribu",
+                period: "/ bln",
+                location: "Pontianak Kota",
+                sold: "2 Kamar Kosong",
+                icon: "fa-door-open",
+                bgColor: "from-amber-600 to-yellow-700",
+                images: ["https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=600"],
+                specs: { kt: "1", km: "1", lt: "16 m²", tipe: "" },
+                description: "Kost nyaman untuk mahasiswa/karyawan, lingkungan tenang dan bersih."
+            },
+            {
+                //id: 18,
+                //title: "Kost Premium Campur Eksklusif - Unit 3",
+                //type: "kost",
+                //typeDetail: "Bulanan",
+                //skema: "PUTRI", // <--- TAMBAHKAN BARIS INI
+                //price: "Rp 2.0 Jt",
+                //period: "/ bln",
+                //location: "Pontianak Selatan",
+                //sold: "Penuh",
+                //icon: "fa-door-open",
+                //bgColor: "from-amber-600 to-yellow-700",
+                //images: ["https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=600"],
+                //specs: { kt: "1", km: "1", lt: "20 m²", tipe: "" },
+                //description: "Kost fasilitas premium berlokasi di pusat bisnis. Keamanan 24 jam dilengkapi CCTV."
+            }*/
+        ];
+
+        let currentFilterCategory = null; 
+        let currentSearchQuery = "";
+        let surveyCompleted = localStorage.getItem("sudahIsiSurvey") === "true"; 
+        let selectedProductForSurvey = null; 
+        let carouselCurrentSlide = 0;
+        let activeProduct = null;
+        let homeScrollPosition = 0;
+let modalCurrentSlide = 0;
+        if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'auto';
+}
+        renderProducts();
+
+        function renderProducts() {
+            const grid = document.getElementById("product-grid");
+            const emptyState = document.getElementById("empty-state");
+            if (!grid) return;
+            
+            grid.innerHTML = "";
+            let filtered = properties;
+
+            if (currentFilterCategory) filtered = filtered.filter(item => item.type === currentFilterCategory);
+            if (currentSearchQuery) {
+                const query = currentSearchQuery.toLowerCase();
+                filtered = filtered.filter(item => item.title.toLowerCase().includes(query) || item.location.toLowerCase().includes(query));
+            }
+
+            if (filtered.length === 0) { 
+                emptyState.classList.remove("hidden"); 
+                return; 
+            }
+            emptyState.classList.add("hidden");
+
+            filtered.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "bg-white rounded-xl overflow-hidden border border-gray-100 flex flex-col justify-between shadow-sm hover:shadow-md transition active:bg-gray-50 cursor-pointer";
+                card.onclick = () => handleProductClick(item);
+                
+                card.innerHTML = `
+                    <div>
+        <div class="relative aspect-square bg-gray-200 overflow-hidden">
+            <img src="${item.images[0]}" alt="${item.title}" class="w-full h-full object-cover" 
+     onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+
+<div class="hidden w-full h-full bg-gradient-to-br ${item.bgColor} flex items-center justify-center text-white p-4">
+    <i class="fa-solid ${item.icon} text-4xl opacity-80"></i>
+</div>
+            
+            <div class="absolute top-2 left-2 flex flex-wrap gap-1 z-10">
+                <span class="bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                    ${item.type}
+                </span>
+                
+                ${item.skema ? `
+                <span class="bg-blue-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                    ${item.skema}
+                </span>` : ''}
+
+                ${item.specs && item.specs.tipe ? `
+                <span class="bg-amber-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                    Tipe ${item.specs.tipe}
+                </span>` : ''}
+            </div>
+            </div>
+        <div class="p-2.5">
+            <h4 class="text-xs font-bold text-brand-darkText line-clamp-2 h-8 leading-tight mb-1">${item.title}</h4>
+            <p class="text-[9px] text-gray-400 truncate mb-1.5"><i class="fa-solid fa-location-dot mr-1 text-brand-accent"></i>${item.location}</p>
+        </div>
+    </div>
+    <div class="p-2.5 pt-0 flex items-center justify-between">
+        <span class="text-xs font-black text-brand-primary">${item.price}${item.period || ''}</span>
+        <span class="text-[8px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">${item.sold}</span>
+    </div>
+`;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleCategory(cat) {
+            if (currentFilterCategory === cat) { clearCategoryFilter(); } 
+            else {
+                currentFilterCategory = cat;
+                document.getElementById("filter-indicator").classList.remove("hidden");
+                document.getElementById("active-category-name").innerText = cat;
+                renderProducts();
+            }
+        }
+
+        function clearCategoryFilter() {
+            currentFilterCategory = null;
+            document.getElementById("filter-indicator").classList.add("hidden");
+            renderProducts();
+        }
+
+        function filterProperties() {
+            currentSearchQuery = document.getElementById("search-input").value;
+            renderProducts();
+        }
+
+        // ⬇️ SEBELAH SINI WAK, TINGGAL TAMBAHKAN (PASTE) KEDUA FUNGSI BARU INI DI BAWAHNYA ⬇️
+
+        // 1. Fungsi memantau ketikan (Muncul/Sembunyikan tombol X)
+        function toggleClearButton() {
+        const input = document.getElementById("search-input");
+        const clearBtn = document.getElementById("clear-search");
+    
+        if (input && clearBtn) {
+        if (input.value.length > 0) {
+            clearBtn.classList.remove("hidden"); // Kalau ada teks, tombol X muncul
+        } else {
+            clearBtn.classList.add("hidden"); // Kalau kosong, tombol X ngumpet
+        }
+        }
+        }
+
+        // 2. Fungsi hapus teks & langsung refresh daftar produk Nusagriya
+        function clearSearchInput() {
+        const input = document.getElementById("search-input");
+        const clearBtn = document.getElementById("clear-search");
+    
+        if (input) {
+        input.value = ""; // Kosongkan kolom input pencarian
+        
+        // Panggil langsung variabel dan logika render bawaan Wak
+        currentSearchQuery = ""; 
+        renderProducts(); 
+        
+        input.focus(); // Biarkan kursor tetap standby di kolom biar bisa langsung ngetik lagi
+        }
+    
+        if (clearBtn) {
+        clearBtn.classList.add("hidden"); // Sembunyikan kembali tombol X nya
+        }
+        }
+
+        function handleProductClick(product) {
+            homeScrollPosition = window.scrollY;
+
+            selectedProductForSurvey = product;
+
+            if (surveyCompleted) { 
+
+                setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                showProductDetails(product); 
+                }, 30);
+            } 
+            else {
+
+                const modal = document.getElementById("survey-modal");
+                modal.style.display = "flex";
+            }
+        }
+
+        function submitSurvey() {
+            // 1. Ambil nilai baru dari HTML (Usia, Tujuan, Kota)
+            const opsiUsiaTerpilih = document.querySelector('input[name="survey-age"]:checked');
+            const nilaiUsia = opsiUsiaTerpilih ? opsiUsiaTerpilih.value : "Tidak memilih";
+
+            const nilaiTujuan = document.getElementById("survey-purpose")?.value || "Tidak memilih";
+            const nilaiKota = document.getElementById("survey-city")?.value || "Tidak diisi";
+
+            // 2. Susun data untuk dikirim
+            const dataKeSheets = {
+                usia: nilaiUsia,
+                tujuan: nilaiTujuan,
+                kota: nilaiKota,
+                produk: selectedProductForSurvey ? selectedProductForSurvey.title : "Hanya Isi Survei"
+            };
+
+            // 2. Kirim data ke Google Sheets secara diam-diam (Ganti URL di bawah dengan URL Web App Anda nanti)
+            fetch("https://script.google.com/macros/s/AKfycbyKNxrMpFynBzyqHkRso9F7KANlsskQVe2IgCKEBbJE5gtxtcP3BJ1ob-CJc5XBC8GWFA/exec", {
+                method: "POST",
+                body: JSON.stringify(dataKeSheets)
+            })
+            .then(res => res.json())
+            .then(response => console.log("Data sukses terekap di Google Sheets!", response))
+            .catch(err => console.error("Gagal kirim data ke Sheets:", err));
+
+
+            // =========================================================================
+            // TUGAS 1: KUNCI STATUS DI BROWSER (Mencegah Survei Dobel)
+            // =========================================================================
+            localStorage.setItem("sudahIsiSurvey", "true");
+            surveyCompleted = true;
+
+
+            // =========================================================================
+            // NAVIGASI BAWAAN ANDA (Tetap dipertahankan agar tidak glitch)
+            // =========================================================================
+            showToast("Survei tersimpan!");
+            document.getElementById("survey-modal").style.display = "none";
+            if (selectedProductForSurvey) {
+                showProductDetails(selectedProductForSurvey);
+            }
+        }
+
+        // 1. TARUH VARIABEL INI DI ATAS (Di luar fungsi apa pun, biar jadi memori global)
+            let posisiScrollTerakhir = 0;
+
+        function showProductDetails(product) {
+            activeProduct = product;
+
+        // 1. PINDAHKAN HALAMAN (Home disembunyikan, Detail dimunculkan)
+            document.getElementById("home-page").style.display = "none";
+            document.getElementById("detail-page").style.display = "flex";
+
+        // 2. DATA UTAMA PROPERTI
+            document.getElementById("detail-price").innerText = product.price;
+            document.getElementById("detail-period").innerText = product.period || "";
+            document.getElementById("detail-title").innerText = product.title;
+            document.getElementById("detail-type").innerText = product.typeDetail.toUpperCase();
+            document.getElementById("detail-skema").innerText = (product.skema || "PROPERTI").toUpperCase();
+            document.getElementById("detail-location").innerText = product.location;
+    
+        // 3. SPESIFIKASI PROPERTI
+            document.getElementById("spec-kt").innerText = product.specs.kt;
+            document.getElementById("spec-km").innerText = product.specs.km;
+            document.getElementById("spec-lt").innerText = product.specs.lt;
+            document.getElementById("spec-shm").innerText = product.specs.tipe;
+            document.getElementById("detail-description").innerText = product.description;
+
+         // 4. LOGIKA CAROUSEL / SLIDE FOTO
+            carouselCurrentSlide = 0;
+            const carouselContainer = document.getElementById("carousel-images");
+            carouselContainer.innerHTML = "";
+    
+            product.images.forEach(imgUrl => {
+            const container = document.createElement("div");
+            container.className = "w-full h-full shrink-0 relative";
+            container.style.width = "100%";
+        
+             const img = document.createElement("img");
+             img.src = imgUrl;
+             img.className = "w-full h-full object-cover cursor-pointer";
+
+             // Logika agar gambar bisa diklik dan membesar
+    img.onclick = function() {
+    const index = product.images.indexOf(imgUrl); // Mendapatkan nomor urut foto
+    openModal(index); // Memanggil fungsi openModal baru
+};
+    // -----------------------
+
+             img.onerror = function() {
+            this.style.display = 'none';
+            this.nextElementSibling.style.display = 'flex';
+        };
+
+             const fallback = document.createElement("div");
+             fallback.className = `hidden w-full h-full bg-gradient-to-br ${product.bgColor} items-center justify-center text-white`;
+            fallback.innerHTML = `<i class="fa-solid ${product.icon} text-6xl opacity-80"></i>`;
+
+             container.appendChild(img);
+             container.appendChild(fallback);
+             carouselContainer.appendChild(container);
+            });
+    
+            updateCarouselView();
+
+        // 5. LINK WHATSAPP
+            document.getElementById("btn-chat-wa").href = `https://api.whatsapp.com/send?phone=${CONTACT_AGENCY_WA}&text=Halo,%20saya%20tertarik%20unit%20${encodeURIComponent(product.title)}`;
+             document.getElementById("btn-survey-wa").href = `https://api.whatsapp.com/send?phone=${CONTACT_AGENCY_WA}&text=Halo,%20mau%20jadwal%20survey%20unit%20${encodeURIComponent(product.title)}`;
+
+        // 6. SUNTIKKAN KODE INI DI BARIS PALING BAWAH: Paksa browser fokus ke atas halaman detail
+            const anchor = document.getElementById("detail-top-anchor");
+            if (anchor) {
+            anchor.focus();
+             }
+
+             const footer = document.getElementById("web-footer");
+            if (footer) {
+                footer.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        function updateCarouselView() {
+    if (!activeProduct) return;
+
+    // Update teks nomor slide
+    document.getElementById("total-slide-num").innerText = activeProduct.images.length;
+    document.getElementById("current-slide-num").innerText = carouselCurrentSlide + 1;
+
+    // Geser carousel utama
+    const mainCarousel = document.getElementById("carousel-images");
+    if (mainCarousel) {
+        mainCarousel.style.transform = `translateX(-${carouselCurrentSlide * 100}%)`;
+    }
+
+    // Geser carousel di dalam modal (Lightbox)
+    const modalCarousel = document.getElementById("modal-carousel");
+    if (modalCarousel) {
+        modalCarousel.style.transform = `translateX(-${carouselCurrentSlide * 100}%)`;
+    }
+}
+
+        function nextSlide() { 
+            if (activeProduct) { 
+                carouselCurrentSlide = (carouselCurrentSlide + 1) % activeProduct.images.length; 
+                updateCarouselView(); 
+            } 
+        }
+        
+        function prevSlide() { 
+            if (activeProduct) { 
+                carouselCurrentSlide = (carouselCurrentSlide - 1 + activeProduct.images.length) % activeProduct.images.length; 
+                updateCarouselView(); 
+            } 
+        }
+
+        // --- KODE BARU KONTROL POP-UP (DP & BONUS) ---
+        function openSubModal(modalId) {
+            if (!activeProduct) return; // Pastikan ada rumah yang sedang dibuka
+            
+            if (modalId === 'modal-dp') {
+                document.getElementById('sub-dp-title').innerText = activeProduct.title;
+                
+                if (activeProduct.kpr) {
+                    document.getElementById('kpr-dp').innerText = activeProduct.kpr.dp;
+                    document.getElementById('kpr-10th').innerText = activeProduct.kpr.th10;
+                    document.getElementById('kpr-15th').innerText = activeProduct.kpr.th15;
+                    document.getElementById('kpr-20th').innerText = activeProduct.kpr.th20;
+                } else {
+                    document.getElementById('kpr-dp').innerText = "Hubungi Agen";
+                    document.getElementById('kpr-10th').innerText = "-";
+                    document.getElementById('kpr-15th').innerText = "-";
+                    document.getElementById('kpr-20th').innerText = "-";
+                }
+            } else if (modalId === 'modal-bonus') {
+                document.getElementById('sub-bonus-title').innerText = activeProduct.title;
+                
+                const bonusContainer = document.getElementById('kpr-bonus-list');
+                bonusContainer.innerHTML = ""; // Bersihkan list bonus lama
+                
+                // Cek apakah rumah tersebut memiliki data bonus khusus
+                if (activeProduct.bonus && activeProduct.bonus.length > 0) {
+                    activeProduct.bonus.forEach(item => {
+                        const row = document.createElement('div');
+                        row.className = "flex items-start gap-2";
+                        row.innerHTML = `<span>✔</span> <span>${item}</span>`;
+                        bonusContainer.appendChild(row);
+                    });
+                } else {
+                    // Jika data bonus kosong atau bertipe kost yang tidak ada bonusnya
+                    const row = document.createElement('div');
+                    row.className = "flex items-start gap-2 italic text-gray-500";
+                    row.innerHTML = `<span>🎁</span> <span>Hubungi agen untuk promo bulan ini!</span>`;
+                    bonusContainer.appendChild(row);
+                }
+            }
+            
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+
+        }
+
+        function closeSubModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden'); // Memasang kembali class hidden Tailwind
+            }
+
+        }
+// lightbox
+        function openModal(index) {
+    const modal = document.getElementById("image-modal");
+    const carousel = document.getElementById("modal-carousel");
+    
+    // 1. Masukkan semua foto dari activeProduct.images ke dalam modal
+    carousel.innerHTML = "";
+    activeProduct.images.forEach(imgUrl => {
+        carousel.innerHTML += `
+            <div class="w-full h-full shrink-0 flex items-center justify-center p-2">
+                <img src="${imgUrl}" class="max-w-full max-h-full object-contain">
+            </div>`;
+    });
+    
+    // 2. Set posisi slide ke index yang diklik
+    modalCurrentSlide = index;
+    updateModalSlide();
+    modal.classList.remove("hidden");
+    
+    // 3. Tampilkan modal
+    // 3. TAMBAHKAN KODE EVENT LISTENER DI SINI (Di dalam fungsi openModal)
+    carousel.removeEventListener('touchstart', handleTouchStart);
+    carousel.removeEventListener('touchend', handleTouchEnd);
+    carousel.addEventListener('touchstart', handleTouchStart);
+    carousel.addEventListener('touchend', handleTouchEnd);
+}
+
+function updateModalSlide() {
+    const carousel = document.getElementById("modal-carousel");
+    carousel.style.transform = `translateX(-${modalCurrentSlide * 100}%)`;
+}
+
+function nextModalSlide() {
+    if (modalCurrentSlide < activeProduct.images.length - 1) {
+        modalCurrentSlide++;
+        updateModalSlide();
+    }
+}
+
+function prevModalSlide() {
+    if (modalCurrentSlide > 0) {
+        modalCurrentSlide--;
+        updateModalSlide();
+    }
+}
+
+        // Tambahkan ini di bawah fungsi closeSubModal yang sudah ada
+function closeModal() {
+    const modal = document.getElementById("image-modal");
+    modal.classList.add("hidden");
+}
+
+// --- FUNGSI SWIPE UNTUK HALAMAN DETAIL (TAMBAHKAN DI SINI) ---
+
+function enableSwipeDetail() {
+    const carouselContainer = document.getElementById("carousel-images");
+    
+    // Pastikan carousel-nya ketemu sebelum pasang event
+    if (!carouselContainer) return;
+
+    carouselContainer.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    carouselContainer.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeDetail();
+    });
+}
+
+function handleSwipeDetail() {
+    // Geser kiri (swipe ke kiri)
+    if (touchEndX < touchStartX - 50) {
+        nextSlide(); 
+    } 
+    // Geser kanan (swipe ke kanan)
+    else if (touchEndX > touchStartX + 50) {
+        prevSlide();
+    }
+}
+
+// Jalankan saat halaman siap
+document.addEventListener('DOMContentLoaded', enableSwipeDetail);
+
+        function goBackToHome() {
+            document.getElementById("home-page").style.display = "flex";
+            window.scrollTo({ top: homeScrollPosition, behavior: 'instant' });
+            document.getElementById("detail-page").style.display = "none";
+            const footer = document.getElementById("web-footer");
+            if (footer) {
+                footer.style.setProperty('display', 'block', 'important');
+            }
+
+            
+        }
+        
+        function sharePropertyDirectly() { showToast("Tautan disalin!"); }
+        
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            document.getElementById("toast-message").innerText = message;
+            toast.classList.remove("opacity-0", "pointer-events-none");
+            setTimeout(() => { toast.classList.add("opacity-0", "pointer-events-none"); }, 2000);
+        }
+
+        function handleTouchStart(e) { 
+    touchStartX = e.changedTouches[0].screenX; 
+}
+
+function handleTouchEnd(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    // Deteksi swipe
+    if (touchEndX < touchStartX - 50) nextModalSlide(); // Geser kiri
+    if (touchEndX > touchStartX + 50) prevModalSlide(); // Geser kanan
+}
+
+    </script> 
+</body>
+</html>
