@@ -1333,7 +1333,7 @@ window.onpopstate = function(event) {
 
         function showProductDetails(product) {
             
-            sessionStorage.setItem('posisiScroll', window.pageYOffset || document.documentElement.scrollTop);
+            posisiScrollTerakhir = window.pageYOffset || document.documentElement.scrollTop;
     
     activeProduct = product;
             activeProduct = product;
@@ -1586,40 +1586,36 @@ function handleSwipeDetail() {
 document.addEventListener('DOMContentLoaded', enableSwipeDetail);
 
         function goBackToHome() {
-    // 1. Tampilkan kembali Home & Sembunyikan Detail
+    // 1. Tampilkan Home, Sembunyikan Detail
     document.getElementById("home-page").style.display = "flex";
     document.getElementById("detail-page").style.display = "none";
     
     // 2. Tampilkan Footer
     const footer = document.getElementById("web-footer");
-    if (footer) {
-        footer.style.setProperty('display', 'block', 'important');
-    }
+    if (footer) footer.style.setProperty('display', 'block', 'important');
 
-    // 3. PENGEMBALIAN POSISI SCROLL (Pakai nama variabel yang sama)
-    window.scrollTo({ 
-        top: posisiScrollTerakhir, 
-        behavior: 'instant' 
+    // 3. PENGUNCI POSISI (Satu baris ini saja)
+    // Gunakan requestAnimationFrame agar eksekusi setelah render selesai
+    requestAnimationFrame(() => {
+        window.scrollTo(0, posisiScrollTerakhir);
     });
 }
 
 // 3. Tambahkan ini di luar fungsi manapun (di bawah file)
 window.onpopstate = function(event) {
+    // 1. Jika di detail, tutup detailnya
     if (document.getElementById("detail-page").style.display === "flex") {
-        goBackToHome();
+        document.getElementById("home-page").style.display = "flex";
+        document.getElementById("detail-page").style.display = "none";
+        
+        const footer = document.getElementById("web-footer");
+        if (footer) footer.style.setProperty('display', 'block', 'important');
     }
 
-    // Ambil posisi dari penyimpanan
-    const savedPos = sessionStorage.getItem('posisiScroll') || 0;
-
-    // "Pengejaran" posisi: lakukan scroll berkali-kali dalam durasi singkat
-    // Ini gunanya untuk menimpa posisi 0 paksaan dari browser
-    let count = 0;
-    const interval = setInterval(function() {
-        window.scrollTo(0, savedPos);
-        count++;
-        if (count > 5) clearInterval(interval); // Berhenti setelah 5 kali coba
-    }, 50); // Cek tiap 50ms
+    // 2. "Lock" posisi scroll agar tidak lompat ke atas
+    requestAnimationFrame(function() {
+        window.scrollTo(0, posisiScrollTerakhir);
+    });
 };
         
         function sharePropertyDirectly() { showToast("Tautan disalin!"); }
